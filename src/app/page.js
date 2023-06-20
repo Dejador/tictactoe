@@ -1,95 +1,126 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
 
-export default function Home() {
+import { useState } from 'react';
+
+function Board() {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+  const [isXNext, setIsXNext] = useState(true);
+
+  function handleClick(i) {
+    if (winner || squares[i]) {
+      return;
+    } else {
+      squares[i] = isXNext ? 'X' : 'O';
+      setSquares(squares);
+      setIsXNext(!isXNext);
+    }
+  }
+
+  function renderSquare(i) {
+    return (
+      <Square
+        value={squares[i]}
+        handleOnSquareClick={() => {
+          handleClick(i);
+        }}
+      />
+    );
+  }
+
+  const calculateWinner = (squares) => {
+    const winningPatterns = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [2, 4, 6],
+      [0, 4, 8],
+    ];
+
+    for (let i = 0; i < winningPatterns.length; i++) {
+      const [a, b, c] = winningPatterns[i];
+      if (
+        squares[a] &&
+        squares[a] === squares[b] &&
+        squares[a] === squares[c]
+      ) {
+        return squares[a];
+      }
+    }
+    return null;
+  };
+
+  function handleReset() {
+    setSquares(Array(9).fill(null));
+    setIsXNext(true);
+  }
+
+  function ResetGame() {
+    if (!squares.every((x) => x === null)) {
+      return (
+        <button className='restart-button' onClick={handleReset}>
+          Reset!
+        </button>
+      );
+    }
+  }
+
+  const winner = calculateWinner(squares);
+  let gameOver = false;
+
+  if (squares.every((x) => x !== null)) {
+    gameOver = true;
+  }
+
+  let status;
+  if (winner) {
+    status = `Winner is ${winner}`;
+  } else if (gameOver) {
+    status = `No more moves!`;
+  } else {
+    status = `${isXNext ? 'X' : 'O'}'s Turn`;
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <>
+      <h1 className='title'>Tic-Tac-Toe!</h1>
+      <div>
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <div>
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
       </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div>
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
       </div>
-    </main>
-  )
+      <div className='status'>{status}</div>
+      <ResetGame />
+    </>
+  );
 }
+
+function Square({ value, handleOnSquareClick }) {
+  return (
+    <button className='button' onClick={handleOnSquareClick}>
+      {value}
+    </button>
+  );
+}
+
+function App() {
+  return (
+    <div className='board'>
+      <Board />
+    </div>
+  );
+}
+
+export default App;
